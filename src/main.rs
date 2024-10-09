@@ -1,8 +1,8 @@
-use teloxide::prelude::*;
 use dotenv::from_path;
+use sqlx::sqlite::SqlitePool;
 use std::env;
 use std::path::Path;
-use sqlx::sqlite::SqlitePool;
+use teloxide::prelude::*;
 
 #[tokio::main]
 async fn main() {
@@ -48,9 +48,7 @@ async fn main() {
                 msg.chat.id,
                 format!(
                     "Recorded transaction of {} amount with description '{}' from user {}",
-                    amount,
-                    description,
-                    user.first_name
+                    amount, description, user.first_name
                 ),
             )
             .await
@@ -61,4 +59,3 @@ async fn main() {
     })
     .await;
 }
-

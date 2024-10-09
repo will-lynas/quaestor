@@ -9,3 +9,4 @@ log = "0.4"
 pretty_env_logger = "0.5"
 tokio = { version =  "1.8", features = ["rt-multi-thread", "macros"] }
 dotenv = "0.15.0"
+sqlx = { version = "0.8.2", features = ["sqlite", "runtime-tokio", "macros"] }

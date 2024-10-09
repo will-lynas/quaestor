@@ -8,7 +8,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: will-lynas/rust-vps-deploy@v0.11.0
+      - uses: will-lynas/rust-vps-deploy@main
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}

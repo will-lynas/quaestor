@@ -5,17 +5,14 @@ use std::path::Path;
 use teloxide::prelude::*;
 use teloxide::utils::command::BotCommands;
 
+/// The following commands are supported:
 #[derive(BotCommands, Clone)]
-#[command(
-    rename_rule = "lowercase",
-    description = "These commands are supported:"
-)]
+#[command(rename_rule = "lowercase")]
 enum Command {
-    #[command(description = "Add a transaction to the ledger", parse_with = "split")]
-    Add {
-        amount: f64,
-        desc: String,
-    },
+    /// Add a transaction to the ledger
+    #[command(parse_with = "split")]
+    Add { amount: f64, desc: String },
+    /// Display this text
     Help,
 }
 

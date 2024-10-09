@@ -26,7 +26,7 @@ async fn main() {
             let description = msg.text().unwrap_or("").to_string();
 
             let chat_id = msg.chat.id.0;
-            let user_id = msg.from().map(|u| u.id.0 as i64).unwrap_or(0);
+            let user_id = msg.from.unwrap().id.0 as i64;
             let amount = 420.69_f64;
 
             sqlx::query!(

@@ -4,6 +4,10 @@ init:
 deploy:
     just init
     just db-migrate
+    just build
+
+build:
+    cargo build --release
 
 db-migrate:
     sqlx database create

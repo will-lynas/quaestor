@@ -12,6 +12,7 @@ enum Command {
     /// Display this text
     Help,
     /// Add a transaction to the ledger
+    /// Usage: add <amount> <description>
     #[command(parse_with = "split")]
     Add { amount: f64, desc: String },
 }

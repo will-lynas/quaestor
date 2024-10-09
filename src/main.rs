@@ -37,12 +37,9 @@ async fn main() {
         async move {
             match cmd {
                 Command::Add { amount, desc } => {
-                    let description = msg.text().unwrap_or("").to_string();
-
                     let chat_id = msg.chat.id.0;
                     let user = msg.from.unwrap();
                     let user_id = user.id.0 as i64;
-                    let amount = 420.69_f64;
 
                     sqlx::query!(
                         r#"
@@ -51,7 +48,7 @@ async fn main() {
                 "#,
                         chat_id,
                         user_id,
-                        description,
+                        desc,
                         amount
                     )
                     .execute(&pool)
@@ -62,7 +59,7 @@ async fn main() {
                         msg.chat.id,
                         format!(
                             "Recorded transaction of {} amount with description '{}' from user {}",
-                            amount, description, user.first_name
+                            amount, desc, user.first_name
                         ),
                     )
                     .await

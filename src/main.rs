@@ -20,13 +20,14 @@ async fn main() {
         .await
         .expect("Failed to create database pool");
 
-    teloxide::repl(bot, move |_bot: Bot, msg: Message| {
+    teloxide::repl(bot, move |bot: Bot, msg: Message| {
         let pool = pool.clone();
         async move {
             let description = msg.text().unwrap_or("").to_string();
 
             let chat_id = msg.chat.id.0;
-            let user_id = msg.from.unwrap().id.0 as i64;
+            let user = msg.from.unwrap();
+            let user_id = user.id.0 as i64;
             let amount = 420.69_f64;
 
             sqlx::query!(
@@ -40,7 +41,20 @@ async fn main() {
                 amount
             )
             .execute(&pool)
-            .await.unwrap();
+            .await
+            .unwrap();
+
+            bot.send_message(
+                msg.chat.id,
+                format!(
+                    "Recorded transaction of {} amount with description '{}' from user {}",
+                    amount,
+                    description,
+                    user.first_name
+                ),
+            )
+            .await
+            .unwrap();
 
             Ok(())
         }

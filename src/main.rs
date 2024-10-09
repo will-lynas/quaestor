@@ -25,11 +25,12 @@ async fn main() {
 
     let bot_token = env::var("BOT_TOKEN").expect("BOT_TOKEN not found in .env file");
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL not found in .env file");
-    let bot = Bot::new(bot_token);
 
     let pool = SqlitePool::connect(&database_url)
         .await
         .expect("Failed to create database pool");
+
+    let bot = Bot::new(bot_token);
 
     teloxide::repl(bot, move |bot: Bot, msg: Message| {
         let pool = pool.clone();

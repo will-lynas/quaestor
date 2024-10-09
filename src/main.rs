@@ -32,43 +32,44 @@ async fn main() {
 
     let bot = Bot::new(bot_token);
 
-    Command::repl(bot, move |bot: Bot, msg: Message, cmd: Command| match cmd {
-        Command::Add { amount, desc } => {
-            let pool = pool.clone();
-            async move {
-                let description = msg.text().unwrap_or("").to_string();
+    Command::repl(bot, move |bot: Bot, msg: Message, cmd: Command| {
+        let pool = pool.clone();
+        async move {
+            match cmd {
+                Command::Add { amount, desc } => {
+                    let description = msg.text().unwrap_or("").to_string();
 
-                let chat_id = msg.chat.id.0;
-                let user = msg.from.unwrap();
-                let user_id = user.id.0 as i64;
-                let amount = 420.69_f64;
+                    let chat_id = msg.chat.id.0;
+                    let user = msg.from.unwrap();
+                    let user_id = user.id.0 as i64;
+                    let amount = 420.69_f64;
 
-                sqlx::query!(
-                    r#"
+                    sqlx::query!(
+                        r#"
                 INSERT INTO transactions (chatID, userID, description, amount)
                 VALUES (?1, ?2, ?3, ?4)
                 "#,
-                    chat_id,
-                    user_id,
-                    description,
-                    amount
-                )
-                .execute(&pool)
-                .await
-                .unwrap();
+                        chat_id,
+                        user_id,
+                        description,
+                        amount
+                    )
+                    .execute(&pool)
+                    .await
+                    .unwrap();
 
-                bot.send_message(
-                    msg.chat.id,
-                    format!(
-                        "Recorded transaction of {} amount with description '{}' from user {}",
-                        amount, description, user.first_name
-                    ),
-                )
-                .await
-                .unwrap();
-
-                Ok(())
+                    bot.send_message(
+                        msg.chat.id,
+                        format!(
+                            "Recorded transaction of {} amount with description '{}' from user {}",
+                            amount, description, user.first_name
+                        ),
+                    )
+                    .await
+                    .unwrap();
+                }
             }
+            Ok(())
         }
     })
     .await;

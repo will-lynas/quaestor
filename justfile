@@ -10,7 +10,6 @@ build:
     cargo build --release
 
 db-migrate:
-    touch database.db
     sqlx database create
     sqlx migrate run --source migrations
 

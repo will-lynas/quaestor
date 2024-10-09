@@ -20,12 +20,12 @@ async fn main() {
         .await
         .expect("Failed to create database pool");
 
-    teloxide::repl(bot, move |bot: Bot, msg: Message| {
+    teloxide::repl(bot, move |_bot: Bot, msg: Message| {
         let pool = pool.clone();
         async move {
             let description = msg.text().unwrap_or("").to_string();
 
-            let chat_id = msg.chat.id.0 as i64;
+            let chat_id = msg.chat.id.0;
             let user_id = msg.from().map(|u| u.id.0 as i64).unwrap_or(0);
             let amount = 420.69_f64;
 

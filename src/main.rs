@@ -12,7 +12,11 @@ use teloxide::utils::command::BotCommands;
 )]
 enum Command {
     #[command(description = "Add a transaction to the ledger", parse_with = "split")]
-    Add { amount: f64, desc: String },
+    Add {
+        amount: f64,
+        desc: String,
+    },
+    Help,
 }
 
 #[tokio::main]
@@ -44,6 +48,11 @@ async fn main() {
 
 async fn handle_cmd(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) {
     match cmd {
+        Command::Help => {
+            bot.send_message(msg.chat.id, Command::descriptions().to_string())
+                .await
+                .unwrap();
+        }
         Command::Add { amount, desc } => {
             let chat_id = msg.chat.id.0;
             let user = msg.from.unwrap();

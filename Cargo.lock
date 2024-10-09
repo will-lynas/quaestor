@@ -1738,6 +1738,8 @@ dependencies = [
  "smallvec",
  "sqlformat",
  "thiserror",
+ "tokio",
+ "tokio-stream",
  "tracing",
  "url",
 ]
@@ -1777,6 +1779,7 @@ dependencies = [
  "sqlx-sqlite",
  "syn 2.0.79",
  "tempfile",
+ "tokio",
  "url",
 ]
 

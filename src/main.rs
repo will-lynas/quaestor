@@ -2,7 +2,18 @@ use dotenv::from_path;
 use sqlx::sqlite::SqlitePool;
 use std::env;
 use std::path::Path;
+use teloxide::macros::BotCommands;
 use teloxide::prelude::*;
+
+#[derive(BotCommands, Clone)]
+#[command(
+    rename_rule = "lowercase",
+    description = "These commands are supported:"
+)]
+enum Command {
+    #[command(description = "Add a transaction to the ledger", parse_with = "split")]
+    Add { amount: f64, desc: String },
+}
 
 #[tokio::main]
 async fn main() {

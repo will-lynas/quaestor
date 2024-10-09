@@ -15,6 +15,8 @@ enum Command {
     /// Usage: add <amount> <description>
     #[command(parse_with = "split")]
     Add { amount: f64, desc: String },
+    /// Display the ledger
+    Display,
 }
 
 #[tokio::main]
@@ -79,6 +81,38 @@ async fn handle_cmd(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) {
             )
             .await
             .unwrap();
+        }
+        Command::Display => {
+            let chat_id = msg.chat.id.0;
+
+            let transactions = sqlx::query!(
+                r#"
+                SELECT userID as "user_id!", description as "description!", amount as "amount!"
+                FROM transactions
+                WHERE chatID = ?
+                "#,
+                chat_id
+            )
+            .fetch_all(&pool)
+            .await
+            .unwrap();
+
+            if transactions.is_empty() {
+                bot.send_message(msg.chat.id, "No transactions found.")
+                    .await
+                    .unwrap();
+            } else {
+                let mut lines = Vec::new();
+
+                for tx in transactions {
+                    let line = format!("User {}: {} - {}", tx.user_id, tx.description, tx.amount);
+                    lines.push(line);
+                }
+
+                let response = lines.join("\n");
+
+                bot.send_message(msg.chat.id, response).await.unwrap();
+            }
         }
     }
 }

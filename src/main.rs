@@ -9,11 +9,11 @@ use teloxide::utils::command::BotCommands;
 #[derive(BotCommands, Clone)]
 #[command(rename_rule = "lowercase")]
 enum Command {
+    /// Display this text
+    Help,
     /// Add a transaction to the ledger
     #[command(parse_with = "split")]
     Add { amount: f64, desc: String },
-    /// Display this text
-    Help,
 }
 
 #[tokio::main]

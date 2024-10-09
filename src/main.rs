@@ -32,7 +32,7 @@ async fn main() {
 
     let bot = Bot::new(bot_token);
 
-    teloxide::repl(bot, move |bot: Bot, msg: Message, cmd: Command| match cmd {
+    Command::repl(bot, move |bot: Bot, msg: Message, cmd: Command| match cmd {
         Command::Add { amount, desc } => {
             let pool = pool.clone();
             async move {

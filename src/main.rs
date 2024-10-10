@@ -17,6 +17,8 @@ enum Command {
     Add { amount: f64, desc: String },
     /// Display the ledger
     Display,
+    /// Reset the ledger
+    Reset,
 }
 
 #[tokio::main]
@@ -114,5 +116,6 @@ async fn handle_cmd(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) {
                 bot.send_message(msg.chat.id, response).await.unwrap();
             }
         }
+        Command::Reset => {}
     }
 }

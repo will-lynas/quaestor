@@ -100,7 +100,7 @@ async fn handle_cmd(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) {
             .unwrap();
 
             if transactions.is_empty() {
-                bot.send_message(msg.chat.id, "No transactions found.")
+                bot.send_message(msg.chat.id, "No transactions found")
                     .await
                     .unwrap();
             } else {
@@ -130,7 +130,7 @@ async fn handle_cmd(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) {
             .await
             .unwrap();
 
-            bot.send_message(msg.chat.id, "All transactions have been reset.")
+            bot.send_message(msg.chat.id, "All transactions have been reset")
                 .await
                 .unwrap();
         }

@@ -116,6 +116,23 @@ async fn handle_cmd(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) {
                 bot.send_message(msg.chat.id, response).await.unwrap();
             }
         }
-        Command::Reset => {}
+        Command::Reset => {
+            let chat_id = msg.chat.id.0;
+
+            sqlx::query!(
+                r#"
+                DELETE FROM transactions
+                WHERE chatID = ?
+                "#,
+                chat_id
+            )
+            .execute(&pool)
+            .await
+            .unwrap();
+
+            bot.send_message(msg.chat.id, "All transactions have been reset.")
+                .await
+                .unwrap();
+        }
     }
 }

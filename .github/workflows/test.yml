@@ -11,4 +11,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - shell: bash
+        run: |
+          cargo install just
+          just init
+          just db-migrate
       - uses: will-lynas/rust-check-ci@v0.2.0

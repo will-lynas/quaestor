@@ -2,21 +2,11 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - "**"
   workflow_dispatch:
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: will-lynas/rust-check-ci@v0.2.0
-
   deploy:
-    needs: test
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
     steps:
       - uses: will-lynas/rust-vps-deploy@v0.12.0
         with:

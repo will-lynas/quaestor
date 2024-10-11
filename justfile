@@ -6,9 +6,6 @@ deploy:
     just db-migrate
     cargo build --release
 
-ci:
-    just install
-
 pre-push:
     cargo sqlx prepare
 

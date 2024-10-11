@@ -25,6 +25,7 @@ jobs:
       - shell: bash
         run: |
           just ci
+          cargo sqlx prepare --check
           cargo fmt --check
           cargo check
           cargo check --tests

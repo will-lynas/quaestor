@@ -19,6 +19,8 @@ jobs:
           toolchain: 1.81.0
           components: rustfmt, clippy
 
+      - uses: Swatinem/rust-cache@v2
+
       - shell: bash
         run: |
           just ci

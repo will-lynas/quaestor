@@ -8,7 +8,6 @@ deploy:
 
 ci:
     just install
-    just db-migrate
 
 db-migrate:
     sqlx database create

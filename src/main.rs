@@ -1,15 +1,21 @@
+use std::{
+    env,
+    path::Path,
+};
+
 use dotenv::from_path;
+use dptree::case;
 use sqlx::sqlite::SqlitePool;
-use teloxide::dispatching::{UpdateFilterExt, UpdateHandler};
-use std::env;
-use std::path::Path;
 use teloxide::{
-    dispatching::dialogue,
-    dispatching::dialogue::InMemStorage,
+    dispatching::{
+        dialogue,
+        dialogue::InMemStorage,
+        UpdateFilterExt,
+        UpdateHandler,
+    },
     prelude::*,
     utils::command::BotCommands,
 };
-use dptree::case;
 
 type MyDialogue = Dialogue<State, InMemStorage<State>>;
 type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
@@ -33,7 +39,9 @@ pub enum State {
     #[default]
     Start,
     ReceiveAmount,
-    ReceiveTitle { amount: f64 },
+    ReceiveTitle {
+        amount: f64,
+    },
 }
 
 #[tokio::main]
@@ -65,22 +73,20 @@ async fn main() {
 }
 
 fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>> {
-    let command_handler = teloxide::filter_command::<Command, _>()
-        .branch(
-            case![State::Start]
+    let command_handler = teloxide::filter_command::<Command, _>().branch(
+        case![State::Start]
             .branch(case![Command::Help].endpoint(help))
             .branch(case![Command::Display].endpoint(display))
             .branch(case![Command::Reset].endpoint(reset))
-            .branch(case![Command::Add].endpoint(start_add_dialogue))
-        );
+            .branch(case![Command::Add].endpoint(start_add_dialogue)),
+    );
 
     let message_handler = Update::filter_message()
         .branch(command_handler)
         .branch(case![State::ReceiveAmount].endpoint(receive_amount))
         .branch(case![State::ReceiveTitle { amount }].endpoint(receive_title));
 
-    dialogue::enter::<Update, InMemStorage<State>, State, _>()
-        .branch(message_handler)
+    dialogue::enter::<Update, InMemStorage<State>, State, _>().branch(message_handler)
 }
 
 async fn help(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) -> HandlerResult {
@@ -102,25 +108,25 @@ async fn display(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) -> Hand
         "#,
         chat_id
     )
-        .fetch_all(&pool)
-        .await
-        .unwrap();
+    .fetch_all(&pool)
+    .await
+    .unwrap();
 
     if transactions.is_empty() {
         bot.send_message(msg.chat.id, "No transactions found")
             .await
             .unwrap();
-        } else {
-            let mut lines = Vec::new();
+    } else {
+        let mut lines = Vec::new();
 
-            for tx in transactions {
-                let line = format!("User {}: {} - {}", tx.user_id, tx.description, tx.amount);
-                lines.push(line);
-            }
+        for tx in transactions {
+            let line = format!("User {}: {} - {}", tx.user_id, tx.description, tx.amount);
+            lines.push(line);
+        }
 
-            let response = lines.join("\n");
+        let response = lines.join("\n");
 
-            bot.send_message(msg.chat.id, response).await.unwrap();
+        bot.send_message(msg.chat.id, response).await.unwrap();
     }
 
     Ok(())
@@ -136,9 +142,9 @@ async fn reset(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) -> Handle
         "#,
         chat_id
     )
-        .execute(&pool)
-        .await
-        .unwrap();
+    .execute(&pool)
+    .await
+    .unwrap();
 
     bot.send_message(msg.chat.id, "All transactions have been reset")
         .await
@@ -157,7 +163,10 @@ async fn receive_amount(bot: Bot, dialogue: MyDialogue, msg: Message) -> Handler
     match msg.text().map(|text| text.parse::<f64>()) {
         Some(Ok(amount)) => {
             bot.send_message(msg.chat.id, "Enter title:").await?;
-            dialogue.update(State::ReceiveTitle { amount }).await.unwrap();
+            dialogue
+                .update(State::ReceiveTitle { amount })
+                .await
+                .unwrap();
         }
         _ => {
             bot.send_message(msg.chat.id, "Send me a number.").await?;
@@ -167,7 +176,13 @@ async fn receive_amount(bot: Bot, dialogue: MyDialogue, msg: Message) -> Handler
     Ok(())
 }
 
-async fn receive_title(bot: Bot, dialogue: MyDialogue, amount: f64, msg: Message, pool: SqlitePool) -> HandlerResult {
+async fn receive_title(
+    bot: Bot,
+    dialogue: MyDialogue,
+    amount: f64,
+    msg: Message,
+    pool: SqlitePool,
+) -> HandlerResult {
     match msg.clone().text() {
         Some(title) => {
             let chat_id = msg.chat.id.0;
@@ -197,7 +212,7 @@ async fn receive_title(bot: Bot, dialogue: MyDialogue, amount: f64, msg: Message
             )
             .await
             .unwrap();
-            
+
             dialogue.exit().await.unwrap();
         }
         None => {

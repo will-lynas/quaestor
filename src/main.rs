@@ -44,6 +44,9 @@ pub enum State {
     },
 }
 
+// Clippy needless_return is bugged with tokio on nightly
+// See https://github.com/rust-lang/rust-clippy/issues/13458
+#[allow(clippy::needless_return)]
 #[tokio::main]
 async fn main() {
     let dotenv_path = Path::new(".env");

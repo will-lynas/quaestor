@@ -11,5 +11,4 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - shell: bash
       - uses: will-lynas/rust-check-ci@main

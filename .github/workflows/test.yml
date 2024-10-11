@@ -1,0 +1,33 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - "**"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: extractions/setup-just@v2
+
+      # TODO: this has been archived
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          override: true
+          components: rustfmt, clippy
+
+      - shell: bash
+        run: |
+          just ci
+          cargo sqlx prepare --check
+          cargo fmt --check
+          cargo check
+          cargo check --tests
+          cargo clippy -- -D warnings
+          cargo test --all

@@ -1,13 +1,16 @@
-init:
+install:
     cargo install sqlx-cli
 
 deploy:
-    just init
+    just install
     just db-migrate
-    just build
-
-build:
     cargo build --release
+
+ci:
+    just install
+
+pre-push:
+    cargo sqlx prepare
 
 db-migrate:
     sqlx database create

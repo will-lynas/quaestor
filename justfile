@@ -1,3 +1,5 @@
+export DATABASE_URL := "sqlite://database.db"
+
 install:
     cargo install sqlx-cli
 

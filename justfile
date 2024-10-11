@@ -6,6 +6,10 @@ deploy:
     just db-migrate
     cargo build --release
 
+ci:
+    just install
+    just db-migrate
+
 db-migrate:
     sqlx database create
     sqlx migrate run --source migrations

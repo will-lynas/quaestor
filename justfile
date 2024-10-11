@@ -1,8 +1,8 @@
-init:
+install:
     cargo install sqlx-cli
 
 deploy:
-    just init
+    just install
     just db-migrate
     just build
 

@@ -1,11 +1,9 @@
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - "**"
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   test:
@@ -16,8 +14,6 @@ jobs:
       - uses: extractions/setup-just@v2
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          components: rustfmt, clippy
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -25,11 +21,22 @@ jobs:
           cache-on-failure: "true"
 
       - shell: bash
-        run: |
-          just ci
-          cargo sqlx prepare --check
-          cargo fmt --check
-          cargo check
-          cargo check --tests
-          cargo clippy -- -D warnings
-          cargo test --all
+        run: just install
+
+      - shell: bash
+        run: cargo sqlx prepare --check
+
+      - shell: bash
+        run: cargo fmt --check
+
+      - shell: bash
+        run: cargo check
+
+      - shell: bash
+        run: cargo check --tests
+
+      - shell: bash
+        run: cargo clippy -- -D warnings
+
+      - shell: bash
+        run: cargo test --all

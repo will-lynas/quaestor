@@ -1,5 +1,6 @@
 use dotenv::from_path;
 use sqlx::sqlite::SqlitePool;
+use teloxide::dispatching::{HandlerExt, UpdateFilterExt};
 use std::env;
 use std::path::Path;
 use teloxide::prelude::*;
@@ -38,17 +39,28 @@ async fn main() {
 
     let bot = Bot::new(bot_token);
 
-    Command::repl(bot, move |bot: Bot, msg: Message, cmd: Command| {
-        let pool = pool.clone();
-        async move {
-            handle_cmd(bot, msg, cmd, pool).await;
-            Ok(())
-        }
-    })
-    .await;
+    let handler = Update::filter_message()
+        .branch(
+            dptree::entry()
+            .filter_command::<Command>()
+            .endpoint(handle_cmd),
+        );
+
+    Dispatcher::builder(bot, handler)
+        .dependencies(dptree::deps![pool])
+        .default_handler(|upd| async move {
+            log::warn!("Unhandled update: {:?}", upd);
+        })
+        .error_handler(LoggingErrorHandler::with_custom_text(
+            "An error has occurred in the dispatcher",
+        ))
+        .enable_ctrlc_handler()
+        .build()
+        .dispatch()
+        .await;
 }
 
-async fn handle_cmd(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) {
+async fn handle_cmd(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) -> Result<(), teloxide::RequestError> {
     match cmd {
         Command::Help => {
             bot.send_message(msg.chat.id, Command::descriptions().to_string())
@@ -135,4 +147,5 @@ async fn handle_cmd(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) {
                 .unwrap();
         }
     }
+    Ok(())
 }

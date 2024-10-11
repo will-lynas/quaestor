@@ -89,7 +89,7 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
     dialogue::enter::<Update, InMemStorage<State>, State, _>().branch(message_handler)
 }
 
-async fn help(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) -> HandlerResult {
+async fn help(bot: Bot, msg: Message) -> HandlerResult {
     bot.send_message(msg.chat.id, Command::descriptions().to_string())
         .await
         .unwrap();
@@ -97,7 +97,7 @@ async fn help(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) -> Handler
     Ok(())
 }
 
-async fn display(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) -> HandlerResult {
+async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
     let chat_id = msg.chat.id.0;
 
     let transactions = sqlx::query!(
@@ -132,7 +132,7 @@ async fn display(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) -> Hand
     Ok(())
 }
 
-async fn reset(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) -> HandlerResult {
+async fn reset(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
     let chat_id = msg.chat.id.0;
 
     sqlx::query!(

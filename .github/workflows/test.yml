@@ -25,11 +25,22 @@ jobs:
           cache-on-failure: "true"
 
       - shell: bash
-        run: |
-          just install
-          cargo sqlx prepare --check
-          cargo fmt --check
-          cargo check
-          cargo check --tests
-          cargo clippy -- -D warnings
-          cargo test --all
+        run: just install
+
+      - shell: bash
+        run: cargo sqlx prepare --check
+
+      - shell: bash
+        run: cargo fmt --check
+
+      - shell: bash
+        run: cargo check
+
+      - shell: bash
+        run: cargo check --tests
+
+      - shell: bash
+        run: cargo clippy -- -D warnings
+
+      - shell: bash
+        run: cargo test --all

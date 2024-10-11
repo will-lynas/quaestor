@@ -1,10 +1,18 @@
+use std::{
+    env,
+    path::Path,
+};
+
 use dotenv::from_path;
 use sqlx::sqlite::SqlitePool;
-use teloxide::dispatching::{HandlerExt, UpdateFilterExt};
-use std::env;
-use std::path::Path;
-use teloxide::prelude::*;
-use teloxide::utils::command::BotCommands;
+use teloxide::{
+    dispatching::{
+        HandlerExt,
+        UpdateFilterExt,
+    },
+    prelude::*,
+    utils::command::BotCommands,
+};
 
 /// The following commands are supported:
 #[derive(BotCommands, Clone)]
@@ -39,12 +47,11 @@ async fn main() {
 
     let bot = Bot::new(bot_token);
 
-    let handler = Update::filter_message()
-        .branch(
-            dptree::entry()
+    let handler = Update::filter_message().branch(
+        dptree::entry()
             .filter_command::<Command>()
             .endpoint(handle_cmd),
-        );
+    );
 
     Dispatcher::builder(bot, handler)
         .dependencies(dptree::deps![pool])
@@ -57,7 +64,12 @@ async fn main() {
         .await;
 }
 
-async fn handle_cmd(bot: Bot, msg: Message, cmd: Command, pool: SqlitePool) -> Result<(), teloxide::RequestError> {
+async fn handle_cmd(
+    bot: Bot,
+    msg: Message,
+    cmd: Command,
+    pool: SqlitePool,
+) -> Result<(), teloxide::RequestError> {
     match cmd {
         Command::Help => {
             bot.send_message(msg.chat.id, Command::descriptions().to_string())

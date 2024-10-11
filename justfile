@@ -9,6 +9,9 @@ deploy:
 ci:
     just install
 
+pre-push:
+    cargo sqlx prepare
+
 db-migrate:
     sqlx database create
     sqlx migrate run --source migrations

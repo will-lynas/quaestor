@@ -48,9 +48,6 @@ async fn main() {
 
     Dispatcher::builder(bot, handler)
         .dependencies(dptree::deps![pool])
-        .default_handler(|upd| async move {
-            log::warn!("Unhandled update: {:?}", upd);
-        })
         .error_handler(LoggingErrorHandler::with_custom_text(
             "An error has occurred in the dispatcher",
         ))

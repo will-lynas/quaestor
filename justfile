@@ -4,9 +4,6 @@ install:
 deploy:
     just install
     just db-migrate
-    just build
-
-build:
     cargo build --release
 
 db-migrate:

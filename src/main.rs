@@ -209,8 +209,8 @@ async fn receive_title(
             bot.send_message(
                 msg.chat.id,
                 format!(
-                    "Recorded transaction of {} amount with description '{}' from user {}",
-                    amount, title, user.first_name
+                    "Added transaction:\n\n 📘 {}\n 💰 {}\n 🥷 {}",
+                    title, amount, user.first_name
                 ),
             )
             .await

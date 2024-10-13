@@ -2,7 +2,7 @@ use sqlx::SqlitePool;
 
 pub struct Transaction {
     pub user_id: i64,
-    pub description: String,
+    pub title: String,
     pub amount: f64,
 }
 
@@ -20,7 +20,7 @@ impl<'a> DB<'a> {
         sqlx::query_as!(
             Transaction,
             r#"
-        SELECT userID as "user_id!", description, amount
+        SELECT userID as "user_id!", title, amount
         FROM transactions
         WHERE chatID = ?
         "#,
@@ -47,12 +47,12 @@ impl<'a> DB<'a> {
     pub async fn add_transaction(&self, transaction: Transaction) {
         sqlx::query!(
             r#"
-                INSERT INTO transactions (chatID, userID, description, amount)
+                INSERT INTO transactions (chatID, userID, title, amount)
                 VALUES (?1, ?2, ?3, ?4)
                 "#,
             self.chat_id,
             transaction.user_id,
-            transaction.description,
+            transaction.title,
             transaction.amount
         )
         .execute(self.pool)

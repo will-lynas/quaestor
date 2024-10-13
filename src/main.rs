@@ -119,7 +119,7 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
         let mut lines = Vec::new();
 
         for tx in transactions {
-            let line = format!("User {}: {} - {}", tx.user_id, tx.description, tx.amount);
+            let line = format!("User {}: {} - {}", tx.user_id, tx.title, tx.amount);
             lines.push(line);
         }
 
@@ -180,7 +180,7 @@ async fn receive_title(
 
             let transaction = Transaction {
                 user_id,
-                description: title.into(),
+                title: title.into(),
                 amount,
             };
 

@@ -119,7 +119,7 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
         let mut lines = Vec::new();
 
         for tx in transactions {
-            let line = format!("User {}: {} - {}", tx.user_id, tx.title, tx.amount);
+            let line = format!("📘 {}\t 💰 {}\t 🥷{}", tx.title, tx.amount, tx.user_id);
             lines.push(line);
         }
 

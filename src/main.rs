@@ -12,12 +12,15 @@ use dptree::case;
 use sqlx::sqlite::SqlitePool;
 use teloxide::{
     dispatching::{
-        dialogue,
-        dialogue::InMemStorage,
+        dialogue::{
+            self,
+            InMemStorage,
+        },
         UpdateFilterExt,
         UpdateHandler,
     },
     prelude::*,
+    types::ParseMode::MarkdownV2,
     utils::command::BotCommands,
 };
 
@@ -189,10 +192,11 @@ async fn receive_title(
             bot.send_message(
                 msg.chat.id,
                 format!(
-                    "Added transaction:\n\n 📘 {}\n 💰 {}\n 🥷 {}",
+                    "**Added transaction**\n\n 📘 {}\n 💰 {}\n 🥷 {}",
                     title, amount, user.first_name
                 ),
             )
+            .parse_mode(MarkdownV2)
             .await
             .unwrap();
 

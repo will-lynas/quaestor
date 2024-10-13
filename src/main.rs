@@ -3,6 +3,7 @@ use std::{
     path::Path,
 };
 
+use db::DB;
 use dotenv::from_path;
 use dptree::case;
 use sqlx::sqlite::SqlitePool;
@@ -16,6 +17,8 @@ use teloxide::{
     prelude::*,
     utils::command::BotCommands,
 };
+
+mod db;
 
 type MyDialogue = Dialogue<State, InMemStorage<State>>;
 type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
@@ -103,17 +106,7 @@ async fn help(bot: Bot, msg: Message) -> HandlerResult {
 async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
     let chat_id = msg.chat.id.0;
 
-    let transactions = sqlx::query!(
-        r#"
-        SELECT userID as "user_id!", description as "description!", amount as "amount!"
-        FROM transactions
-        WHERE chatID = ?
-        "#,
-        chat_id
-    )
-    .fetch_all(&pool)
-    .await
-    .unwrap();
+    let transactions = DB::new(&pool).get_transactions(chat_id).await;
 
     if transactions.is_empty() {
         bot.send_message(msg.chat.id, "No transactions found")
@@ -123,7 +116,12 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
         let mut lines = Vec::new();
 
         for tx in transactions {
-            let line = format!("User {}: {} - {}", tx.user_id, tx.description, tx.amount);
+            let line = format!(
+                "User {}: {} - {}",
+                tx.user_id,
+                tx.description.unwrap(),
+                tx.amount.unwrap()
+            );
             lines.push(line);
         }
 

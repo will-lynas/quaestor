@@ -158,7 +158,7 @@ async fn receive_amount(bot: Bot, dialogue: MyDialogue, msg: Message) -> Handler
                 .unwrap();
         }
         _ => {
-            bot.send_message(msg.chat.id, "Send me a number.").await?;
+            bot.send_message(msg.chat.id, "Send me a number").await?;
         }
     }
 
@@ -199,7 +199,7 @@ async fn receive_title(
             dialogue.exit().await.unwrap();
         }
         None => {
-            bot.send_message(msg.chat.id, "Send me plain text.").await?;
+            bot.send_message(msg.chat.id, "Send me plain text").await?;
         }
     }
 

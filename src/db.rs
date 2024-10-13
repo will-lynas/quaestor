@@ -2,8 +2,8 @@ use sqlx::SqlitePool;
 
 pub struct Transaction {
     pub user_id: i64,
-    pub description: Option<String>,
-    pub amount: Option<f64>,
+    pub description: String,
+    pub amount: f64,
 }
 
 pub struct DB<'a> {

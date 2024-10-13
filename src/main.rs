@@ -119,12 +119,7 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
         let mut lines = Vec::new();
 
         for tx in transactions {
-            let line = format!(
-                "User {}: {} - {}",
-                tx.user_id,
-                tx.description.unwrap(),
-                tx.amount.unwrap()
-            );
+            let line = format!("User {}: {} - {}", tx.user_id, tx.description, tx.amount);
             lines.push(line);
         }
 
@@ -185,8 +180,8 @@ async fn receive_title(
 
             let transaction = Transaction {
                 user_id,
-                description: Some(title.into()),
-                amount: Some(amount),
+                description: title.into(),
+                amount,
             };
 
             DB::new(&pool, chat_id).add_transaction(transaction).await;

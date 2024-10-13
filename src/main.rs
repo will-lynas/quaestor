@@ -135,17 +135,7 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
 
 async fn reset(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
     let chat_id = msg.chat.id.0;
-
-    sqlx::query!(
-        r#"
-        DELETE FROM transactions
-        WHERE chatID = ?
-        "#,
-        chat_id
-    )
-    .execute(&pool)
-    .await
-    .unwrap();
+    DB::new(&pool).reset_chat(chat_id).await;
 
     bot.send_message(msg.chat.id, "All transactions have been reset")
         .await

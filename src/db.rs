@@ -29,4 +29,17 @@ impl<'a> DB<'a> {
         .await
         .unwrap()
     }
+
+    pub async fn reset_chat(&self, chat_id: i64) {
+        sqlx::query!(
+            r#"
+        DELETE FROM transactions
+        WHERE chatID = ?
+        "#,
+            chat_id
+        )
+        .execute(self.pool)
+        .await
+        .unwrap();
+    }
 }

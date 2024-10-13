@@ -43,4 +43,20 @@ impl<'a> DB<'a> {
         .await
         .unwrap();
     }
+
+    pub async fn add_transaction(&self, transaction: Transaction) {
+        sqlx::query!(
+            r#"
+                INSERT INTO transactions (chatID, userID, description, amount)
+                VALUES (?1, ?2, ?3, ?4)
+                "#,
+            self.chat_id,
+            transaction.user_id,
+            transaction.description,
+            transaction.amount
+        )
+        .execute(self.pool)
+        .await
+        .unwrap();
+    }
 }

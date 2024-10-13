@@ -3,7 +3,10 @@ use std::{
     path::Path,
 };
 
-use db::DB;
+use db::{
+    Transaction,
+    DB,
+};
 use dotenv::from_path;
 use dptree::case;
 use sqlx::sqlite::SqlitePool;
@@ -180,19 +183,13 @@ async fn receive_title(
             let user = msg.from.unwrap();
             let user_id = user.id.0 as i64;
 
-            sqlx::query!(
-                r#"
-                INSERT INTO transactions (chatID, userID, description, amount)
-                VALUES (?1, ?2, ?3, ?4)
-                "#,
-                chat_id,
+            let transaction = Transaction {
                 user_id,
-                title,
-                amount
-            )
-            .execute(&pool)
-            .await
-            .unwrap();
+                description: Some(title.into()),
+                amount: Some(amount),
+            };
+
+            DB::new(&pool, chat_id).add_transaction(transaction).await;
 
             bot.send_message(
                 msg.chat.id,

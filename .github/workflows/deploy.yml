@@ -28,3 +28,6 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
             Quaestor deploy successful 🎉
+
+            Triggered by: ${{ github.actor }}
+            Commit message: ${{ github.event.commits[0].message }}

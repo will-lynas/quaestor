@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "\n        SELECT userID as \"user_id!\", description, amount\n        FROM transactions\n        WHERE chatID = ?\n        ",
+  "query": "\n        SELECT userID as \"user_id!\", title, amount\n        FROM transactions\n        WHERE chatID = ?\n        ",
   "describe": {
     "columns": [
       {
@@ -9,7 +9,7 @@
         "type_info": "Integer"
       },
       {
-        "name": "description",
+        "name": "title",
         "ordinal": 1,
         "type_info": "Text"
       },
@@ -23,10 +23,10 @@
       "Right": 1
     },
     "nullable": [
-      true,
-      true,
-      true
+      false,
+      false,
+      false
     ]
   },
-  "hash": "aa88e4d3161c2b90d0d46d3940c66f28cf401f6e663ac40ddbf94424dcb08069"
+  "hash": "d8ee1acc445cf7b89111391e46e7526ab3fdab1d86c6f72d4748ee487d357884"
 }

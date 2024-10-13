@@ -30,4 +30,4 @@ jobs:
             Quaestor deploy successful 🎉
 
             🥷 ${{ github.actor }}
-            💬 ${{ github.event.commits[0].message }}
+            💬 ${{ github.event.head_commit.message }}

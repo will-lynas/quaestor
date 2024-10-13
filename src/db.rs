@@ -8,14 +8,15 @@ pub struct Transaction {
 
 pub struct DB<'a> {
     pool: &'a SqlitePool,
+    chat_id: i64,
 }
 
 impl<'a> DB<'a> {
-    pub fn new(pool: &'a SqlitePool) -> Self {
-        Self { pool }
+    pub fn new(pool: &'a SqlitePool, chat_id: i64) -> Self {
+        Self { pool, chat_id }
     }
 
-    pub async fn get_transactions(&self, chat_id: i64) -> Vec<Transaction> {
+    pub async fn get_transactions(&self) -> Vec<Transaction> {
         sqlx::query_as!(
             Transaction,
             r#"
@@ -23,20 +24,20 @@ impl<'a> DB<'a> {
         FROM transactions
         WHERE chatID = ?
         "#,
-            chat_id
+            self.chat_id
         )
         .fetch_all(self.pool)
         .await
         .unwrap()
     }
 
-    pub async fn reset_chat(&self, chat_id: i64) {
+    pub async fn reset_chat(&self) {
         sqlx::query!(
             r#"
         DELETE FROM transactions
         WHERE chatID = ?
         "#,
-            chat_id
+            self.chat_id
         )
         .execute(self.pool)
         .await

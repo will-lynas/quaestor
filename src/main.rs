@@ -190,6 +190,7 @@ async fn receive_title(
             let chat_id = msg.chat.id.0;
             let user = msg.from.unwrap();
             let user_id = user.id.0 as i64;
+            let name = user.username.unwrap_or(user_id.to_string());
 
             let transaction = Transaction {
                 user_id,
@@ -205,7 +206,7 @@ async fn receive_title(
                     "*Added transaction*\n\n 🏷️ {}\n 💰 {}\n 🥷 {}",
                     title,
                     markdown::escape(&format_pounds(amount)),
-                    user.first_name
+                    markdown::escape(&name)
                 ),
             )
             .parse_mode(MarkdownV2)

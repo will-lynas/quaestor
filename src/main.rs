@@ -21,7 +21,10 @@ use teloxide::{
     },
     prelude::*,
     types::ParseMode::MarkdownV2,
-    utils::command::BotCommands,
+    utils::{
+        command::BotCommands,
+        markdown,
+    },
 };
 
 mod db;
@@ -109,6 +112,10 @@ async fn help(bot: Bot, msg: Message) -> HandlerResult {
     Ok(())
 }
 
+fn format_pounds(value: f64) -> String {
+    format!("£{:.2}", value)
+}
+
 async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
     let chat_id = msg.chat.id.0;
 
@@ -122,7 +129,12 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
         let mut lines = Vec::new();
 
         for tx in transactions {
-            let line = format!("📘 {}\t 💰 {}\t 🥷{}", tx.title, tx.amount, tx.user_id);
+            let line = format!(
+                "📘 {}\t 💰 {}\t 🥷{}",
+                tx.title,
+                format_pounds(tx.amount),
+                tx.user_id
+            );
             lines.push(line);
         }
 
@@ -193,7 +205,9 @@ async fn receive_title(
                 msg.chat.id,
                 format!(
                     "*Added transaction*\n\n 📘 {}\n 💰 {}\n 🥷 {}",
-                    title, amount, user.first_name
+                    title,
+                    markdown::escape(&format_pounds(amount)),
+                    user.first_name
                 ),
             )
             .parse_mode(MarkdownV2)

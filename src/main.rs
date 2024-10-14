@@ -203,10 +203,11 @@ async fn receive_title(
             bot.send_message(
                 msg.chat.id,
                 format!(
-                    "*Added transaction*\n\n 🏷️ {}\n 💰 {}\n 🥷 {}",
+                    "*Added transaction*\n\n 🏷️ {}\n 💰 {}\n 🥷 [{}](tg://user?id={})",
                     title,
                     markdown::escape(&format_pounds(amount)),
-                    markdown::escape(&name)
+                    markdown::escape(&name),
+                    user_id
                 ),
             )
             .parse_mode(MarkdownV2)

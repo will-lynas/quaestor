@@ -128,7 +128,7 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
 
         for tx in transactions {
             let line = format!(
-                "📘 {}\t 💰 {}\t 🥷{}",
+                "🏷️ {}\t 💰 {}\t 🥷{}",
                 tx.title,
                 format_pounds(tx.amount),
                 tx.user_id
@@ -202,7 +202,7 @@ async fn receive_title(
             bot.send_message(
                 msg.chat.id,
                 format!(
-                    "*Added transaction*\n\n 📘 {}\n 💰 {}\n 🥷 {}",
+                    "*Added transaction*\n\n 🏷️ {}\n 💰 {}\n 🥷 {}",
                     title,
                     markdown::escape(&format_pounds(amount)),
                     user.first_name

@@ -26,8 +26,10 @@ use teloxide::{
         markdown,
     },
 };
+use utils::format_pounds;
 
 mod db;
+mod utils;
 
 type MyDialogue = Dialogue<State, InMemStorage<State>>;
 type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
@@ -110,10 +112,6 @@ async fn help(bot: Bot, msg: Message) -> HandlerResult {
         .unwrap();
 
     Ok(())
-}
-
-fn format_pounds(value: f64) -> String {
-    format!("£{:.2}", value)
 }
 
 async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {

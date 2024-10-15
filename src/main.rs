@@ -117,7 +117,7 @@ async fn help(bot: Bot, msg: Message) -> HandlerResult {
 async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
     let chat_id = msg.chat.id.0;
 
-    let transactions = DB::new(&pool, chat_id).get_transactions().await;
+    let transactions = DB::new(&pool).get_transactions(chat_id).await;
 
     if transactions.is_empty() {
         bot.send_message(msg.chat.id, "No transactions found")
@@ -146,7 +146,7 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
 
 async fn reset(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
     let chat_id = msg.chat.id.0;
-    DB::new(&pool, chat_id).reset_chat().await;
+    DB::new(&pool).reset_chat(chat_id).await;
 
     bot.send_message(msg.chat.id, "All transactions have been reset")
         .await
@@ -198,7 +198,7 @@ async fn receive_title(
                 amount,
             };
 
-            DB::new(&pool, chat_id).add_transaction(transaction).await;
+            DB::new(&pool).add_transaction(chat_id, transaction).await;
 
             bot.send_message(
                 msg.chat.id,

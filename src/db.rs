@@ -4,6 +4,7 @@ pub struct Transaction {
     pub user_id: i64,
     pub title: String,
     pub amount: f64,
+    pub description: Option<String>,
 }
 
 pub struct DB<'a> {
@@ -19,7 +20,7 @@ impl<'a> DB<'a> {
         sqlx::query_as!(
             Transaction,
             r#"
-        SELECT userID as "user_id!", title, amount
+        SELECT userID as "user_id!", title, amount, description
         FROM transactions
         WHERE chatID = ?
         "#,
@@ -46,13 +47,14 @@ impl<'a> DB<'a> {
     pub async fn add_transaction(&self, chat_id: i64, transaction: Transaction) {
         sqlx::query!(
             r#"
-                INSERT INTO transactions (chatID, userID, title, amount)
-                VALUES (?1, ?2, ?3, ?4)
+                INSERT INTO transactions (chatID, userID, title, amount, description)
+                VALUES (?1, ?2, ?3, ?4, ?5)
                 "#,
             chat_id,
             transaction.user_id,
             transaction.title,
-            transaction.amount
+            transaction.amount,
+            transaction.description
         )
         .execute(self.pool)
         .await

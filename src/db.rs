@@ -4,7 +4,7 @@ pub struct Transaction {
     pub user_id: i64,
     pub title: String,
     pub amount: f64,
-    pub description: Option<String>,
+    pub description: String,
 }
 
 pub struct DB<'a> {

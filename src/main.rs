@@ -155,7 +155,7 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
                 markdown::escape(&format_pounds(tx.amount)),
                 markdown::escape(&username),
                 tx.user_id,
-                markdown::escape(&tx.description.unwrap_or("-".into()))
+                markdown::escape(&tx.description)
             );
             lines.push(line);
         }
@@ -247,7 +247,7 @@ async fn receive_description(
                 user_id,
                 title: title.clone(),
                 amount,
-                description: Some(description.into()),
+                description: description.to_string(),
             };
 
             DB::new(&pool).add_transaction(chat_id, transaction).await;

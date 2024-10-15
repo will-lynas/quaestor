@@ -142,12 +142,8 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
         let mut lines = Vec::new();
 
         for tx in transactions {
-            let username = db
-                .get_username(tx.user_id)
-                .await
-                .unwrap_or_else(|| tx.user_id.to_string());
             let line =
-                format_transaction(&tx.title, tx.amount, &username, tx.user_id, &tx.description);
+                format_transaction(&db, &tx.title, tx.amount, tx.user_id, &tx.description).await;
             lines.push(line);
         }
 
@@ -236,8 +232,6 @@ async fn receive_description(
             let chat_id = msg.chat.id.0;
             let user = msg.clone().from.unwrap();
             let user_id = user.id.0 as i64;
-            let name = user.username.unwrap_or(user_id.to_string());
-
             let description = if description == "-" {
                 String::new()
             } else {
@@ -251,11 +245,12 @@ async fn receive_description(
                 description: description.clone(),
             };
 
-            DB::new(&pool).add_transaction(chat_id, transaction).await;
+            let db = DB::new(&pool);
+            db.add_transaction(chat_id, transaction).await;
 
             let response = format!(
                 "*Added transaction*\n\n{}",
-                format_transaction(&title, amount, &name, user_id, &description)
+                format_transaction(&db, &title, amount, user_id, &description).await
             );
 
             bot.send_message(msg.chat.id, response)

@@ -92,7 +92,7 @@ impl<'a> DB<'a> {
     }
 
     pub async fn get_username(&self, user_id: i64) -> Option<String> {
-        sqlx::query!(
+        let result = sqlx::query!(
             r#"
             SELECT username
             FROM users
@@ -100,9 +100,14 @@ impl<'a> DB<'a> {
             "#,
             user_id
         )
-        .fetch_one(self.pool)
+        .fetch_optional(self.pool)
         .await
-        .unwrap()
-        .username
+        .unwrap();
+
+        if let Some(record) = result {
+            record.username
+        } else {
+            None
+        }
     }
 }

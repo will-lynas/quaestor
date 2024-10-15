@@ -21,12 +21,9 @@ use teloxide::{
     },
     prelude::*,
     types::ParseMode::MarkdownV2,
-    utils::{
-        command::BotCommands,
-        markdown,
-    },
+    utils::command::BotCommands,
 };
-use utils::format_pounds;
+use utils::format_transaction;
 
 mod db;
 mod utils;
@@ -149,16 +146,8 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
                 .get_username(tx.user_id)
                 .await
                 .unwrap_or_else(|| tx.user_id.to_string());
-            let mut line = format!(
-                "🏷️ {}\n💰 {}\n🥷 [{}](tg://user?id={})",
-                markdown::escape(&tx.title),
-                markdown::escape(&format_pounds(tx.amount)),
-                markdown::escape(&username),
-                tx.user_id
-            );
-            if !tx.description.is_empty() {
-                line.push_str(&format!("\n📝 {}", markdown::escape(&tx.description)));
-            }
+            let line =
+                format_transaction(&tx.title, tx.amount, &username, tx.user_id, &tx.description);
             lines.push(line);
         }
 
@@ -264,17 +253,10 @@ async fn receive_description(
 
             DB::new(&pool).add_transaction(chat_id, transaction).await;
 
-            let mut response = format!(
-                "*Added transaction*\n\n 🏷️ {}\n 💰 {}\n 🥷 [{}](tg://user?id={})",
-                markdown::escape(&title),
-                markdown::escape(&format_pounds(amount)),
-                markdown::escape(&name),
-                user_id
+            let response = format!(
+                "*Added transaction*\n\n{}",
+                format_transaction(&title, amount, &name, user_id, &description)
             );
-
-            if !description.is_empty() {
-                response.push_str(&format!("\n📝 {}", markdown::escape(&description)));
-            }
 
             bot.send_message(msg.chat.id, response)
                 .parse_mode(MarkdownV2)

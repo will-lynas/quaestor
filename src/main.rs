@@ -143,7 +143,7 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
                 .await
                 .unwrap_or_else(|| tx.user_id.to_string());
             let line = format!(
-                "🏷️ {}\t 💰 {}\t 🥷 [{}](tg://user?id={})",
+                "🏷️ {}\n💰 {}\n🥷 [{}](tg://user?id={})",
                 markdown::escape(&tx.title),
                 markdown::escape(&format_pounds(tx.amount)),
                 markdown::escape(&username),
@@ -152,7 +152,7 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
             lines.push(line);
         }
 
-        let response = lines.join("\n");
+        let response = lines.join("\n\n");
 
         bot.send_message(msg.chat.id, response)
             .parse_mode(MarkdownV2)

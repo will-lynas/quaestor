@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                    INSERT INTO users (user_id)\n                    VALUES (?1)\n                    ON CONFLICT(user_id) DO NOTHING\n                    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "2f4c15519b91e1db7b3ddf02c4ce1a2e02c54c8230f67a4df871516e6ced3e61"
+}

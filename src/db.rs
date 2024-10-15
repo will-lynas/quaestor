@@ -60,18 +60,35 @@ impl<'a> DB<'a> {
         .unwrap();
     }
 
-    pub async fn update_user(&self, user_id: i64, username: &str) {
-        sqlx::query!(
-            r#"
-            INSERT INTO users (user_id, username)
-            VALUES (?1, ?2)
-            ON CONFLICT(user_id) DO UPDATE SET username = ?2
-            "#,
-            user_id,
-            username
-        )
-        .execute(self.pool)
-        .await
-        .unwrap();
+    pub async fn update_user(&self, user_id: i64, username: Option<&str>) {
+        match username {
+            Some(name) => {
+                sqlx::query!(
+                    r#"
+                    INSERT INTO users (user_id, username)
+                    VALUES (?1, ?2)
+                    ON CONFLICT(user_id) DO UPDATE SET username = ?2
+                    "#,
+                    user_id,
+                    name
+                )
+                .execute(self.pool)
+                .await
+                .unwrap();
+            }
+            None => {
+                sqlx::query!(
+                    r#"
+                    INSERT INTO users (user_id)
+                    VALUES (?1)
+                    ON CONFLICT(user_id) DO NOTHING
+                    "#,
+                    user_id
+                )
+                .execute(self.pool)
+                .await
+                .unwrap();
+            }
+        }
     }
 }

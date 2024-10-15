@@ -126,8 +126,9 @@ async fn help(bot: Bot, msg: Message) -> HandlerResult {
 
 async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
     let chat_id = msg.chat.id.0;
+    let db = DB::new(&pool);
 
-    let transactions = DB::new(&pool).get_transactions(chat_id).await;
+    let transactions = db.get_transactions(chat_id).await;
 
     if transactions.is_empty() {
         bot.send_message(msg.chat.id, "No transactions found")
@@ -137,10 +138,15 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
         let mut lines = Vec::new();
 
         for tx in transactions {
+            let username = db
+                .get_username(tx.user_id)
+                .await
+                .unwrap_or_else(|| tx.user_id.to_string());
             let line = format!(
-                "🏷️ {}\t 💰 {}\t 🥷{}",
-                tx.title,
-                format_pounds(tx.amount),
+                "🏷️ {}\t 💰 {}\t 🥷 [{}](tg://user?id={})",
+                markdown::escape(&tx.title),
+                markdown::escape(&format_pounds(tx.amount)),
+                markdown::escape(&username),
                 tx.user_id
             );
             lines.push(line);
@@ -148,7 +154,10 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
 
         let response = lines.join("\n");
 
-        bot.send_message(msg.chat.id, response).await.unwrap();
+        bot.send_message(msg.chat.id, response)
+            .parse_mode(MarkdownV2)
+            .await
+            .unwrap();
     }
 
     Ok(())

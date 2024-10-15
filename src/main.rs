@@ -53,7 +53,7 @@ pub enum State {
     #[default]
     AddStart,
     AddReceiveAmount,
-    AddReciveTitle {
+    AddReceiveTitle {
         amount: f64,
     },
 }
@@ -101,7 +101,7 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
     let message_handler = Update::filter_message()
         .branch(command_handler)
         .branch(case![State::AddReceiveAmount].endpoint(receive_amount))
-        .branch(case![State::AddReciveTitle { amount }].endpoint(receive_title));
+        .branch(case![State::AddReceiveTitle { amount }].endpoint(receive_title));
 
     let update_user_handler =
         Update::filter_message().map_async(|msg: Message, pool: SqlitePool| async move {
@@ -185,7 +185,7 @@ async fn receive_amount(bot: Bot, dialogue: MyDialogue, msg: Message) -> Handler
         Some(Ok(amount)) => {
             bot.send_message(msg.chat.id, "Enter title:").await?;
             dialogue
-                .update(State::AddReciveTitle { amount })
+                .update(State::AddReceiveTitle { amount })
                 .await
                 .unwrap();
         }

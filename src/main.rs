@@ -52,9 +52,9 @@ enum Command {
 pub enum State {
     #[default]
     AddStart,
-    AddReceiveAmount,
-    AddReceiveTitle {
-        amount: f64,
+    AddReceiveTitle,
+    AddReceiveAmount {
+        title: String,
     },
 }
 
@@ -100,8 +100,8 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
 
     let message_handler = Update::filter_message()
         .branch(command_handler)
-        .branch(case![State::AddReceiveAmount].endpoint(receive_amount))
-        .branch(case![State::AddReceiveTitle { amount }].endpoint(receive_title));
+        .branch(case![State::AddReceiveTitle].endpoint(receive_title))
+        .branch(case![State::AddReceiveAmount { title }].endpoint(receive_amount));
 
     let update_user_handler =
         Update::filter_message().map_async(|msg: Message, pool: SqlitePool| async move {
@@ -175,37 +175,20 @@ async fn reset(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
 }
 
 async fn start_add_dialogue(bot: Bot, dialogue: MyDialogue, msg: Message) -> HandlerResult {
-    bot.send_message(msg.chat.id, "Enter amount:").await?;
-    dialogue.update(State::AddReceiveAmount).await.unwrap();
+    bot.send_message(msg.chat.id, "Enter title:").await?;
+    dialogue.update(State::AddReceiveTitle).await.unwrap();
     Ok(())
 }
 
-async fn receive_amount(bot: Bot, dialogue: MyDialogue, msg: Message) -> HandlerResult {
-    match msg.text().map(|text| text.parse::<f64>()) {
-        Some(Ok(amount)) => {
-            bot.send_message(msg.chat.id, "Enter title:").await?;
-            dialogue
-                .update(State::AddReceiveTitle { amount })
-                .await
-                .unwrap();
-        }
-        _ => {
-            bot.send_message(msg.chat.id, "Send me a number").await?;
-        }
-    }
-
-    Ok(())
-}
-
-async fn receive_title(
+async fn receive_amount(
     bot: Bot,
     dialogue: MyDialogue,
-    amount: f64,
+    title: String,
     msg: Message,
     pool: SqlitePool,
 ) -> HandlerResult {
-    match msg.clone().text() {
-        Some(title) => {
+    match msg.text().map(|text| text.parse::<f64>()) {
+        Some(Ok(amount)) => {
             let chat_id = msg.chat.id.0;
             let user = msg.from.unwrap();
             let user_id = user.id.0 as i64;
@@ -213,8 +196,9 @@ async fn receive_title(
 
             let transaction = Transaction {
                 user_id,
-                title: title.into(),
+                title: title.clone(),
                 amount,
+                description: None,
             };
 
             DB::new(&pool).add_transaction(chat_id, transaction).await;
@@ -223,7 +207,7 @@ async fn receive_title(
                 msg.chat.id,
                 format!(
                     "*Added transaction*\n\n 🏷️ {}\n 💰 {}\n 🥷 [{}](tg://user?id={})",
-                    title,
+                    markdown::escape(&title),
                     markdown::escape(&format_pounds(amount)),
                     markdown::escape(&name),
                     user_id
@@ -234,6 +218,25 @@ async fn receive_title(
             .unwrap();
 
             dialogue.exit().await.unwrap();
+        }
+        _ => {
+            bot.send_message(msg.chat.id, "Send me a number").await?;
+        }
+    }
+
+    Ok(())
+}
+
+async fn receive_title(bot: Bot, dialogue: MyDialogue, msg: Message) -> HandlerResult {
+    match msg.text() {
+        Some(title) => {
+            bot.send_message(msg.chat.id, "Enter amount:").await?;
+            dialogue
+                .update(State::AddReceiveAmount {
+                    title: title.to_string(),
+                })
+                .await
+                .unwrap();
         }
         None => {
             bot.send_message(msg.chat.id, "Send me plain text").await?;

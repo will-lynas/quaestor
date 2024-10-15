@@ -150,11 +150,12 @@ async fn display(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
                 .await
                 .unwrap_or_else(|| tx.user_id.to_string());
             let line = format!(
-                "🏷️ {}\n💰 {}\n🥷 [{}](tg://user?id={})",
+                "🏷️ {}\n💰 {}\n🥷 [{}](tg://user?id={})\n📝 {}",
                 markdown::escape(&tx.title),
                 markdown::escape(&format_pounds(tx.amount)),
                 markdown::escape(&username),
-                tx.user_id
+                tx.user_id,
+                markdown::escape(&tx.description.unwrap_or("-".into()))
             );
             lines.push(line);
         }

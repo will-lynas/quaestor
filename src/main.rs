@@ -245,23 +245,32 @@ async fn receive_description(
             let user_id = user.id.0 as i64;
             let name = user.username.unwrap_or(user_id.to_string());
 
+            let description = if description == "-" {
+                String::new()
+            } else {
+                description.to_string()
+            };
+
             let transaction = Transaction {
                 user_id,
                 title: title.clone(),
                 amount,
-                description: description.to_string(),
+                description: description.clone(),
             };
 
             DB::new(&pool).add_transaction(chat_id, transaction).await;
 
-            let response = format!(
-                "*Added transaction*\n\n 🏷️ {}\n 💰 {}\n 🥷 [{}](tg://user?id={})\n📝 {}",
+            let mut response = format!(
+                "*Added transaction*\n\n 🏷️ {}\n 💰 {}\n 🥷 [{}](tg://user?id={})",
                 markdown::escape(&title),
                 markdown::escape(&format_pounds(amount)),
                 markdown::escape(&name),
-                user_id,
-                markdown::escape(description)
+                user_id
             );
+
+            if !description.is_empty() {
+                response.push_str(&format!("\n📝 {}", markdown::escape(&description)));
+            }
 
             bot.send_message(msg.chat.id, response)
                 .parse_mode(MarkdownV2)

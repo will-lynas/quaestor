@@ -217,7 +217,11 @@ async fn receive_amount(
 ) -> HandlerResult {
     match msg.text().map(|text| text.parse::<f64>()) {
         Some(Ok(amount)) => {
-            bot.send_message(msg.chat.id, "Enter description:").await?;
+            bot.send_message(
+                msg.chat.id,
+                "Enter description (type '-' for no description):",
+            )
+            .await?;
             dialogue
                 .update(State::AddReceiveDescription { title, amount })
                 .await

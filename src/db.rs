@@ -90,4 +90,19 @@ impl<'a> DB<'a> {
             }
         }
     }
+
+    pub async fn get_username(&self, user_id: i64) -> Option<String> {
+        sqlx::query!(
+            r#"
+            SELECT username
+            FROM users
+            WHERE user_id = ?
+            "#,
+            user_id
+        )
+        .fetch_one(self.pool)
+        .await
+        .unwrap()
+        .username
+    }
 }

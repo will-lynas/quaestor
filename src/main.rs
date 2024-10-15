@@ -51,9 +51,9 @@ enum Command {
 #[derive(Clone, Default)]
 pub enum State {
     #[default]
-    Start,
-    ReceiveAmount,
-    ReceiveTitle {
+    AddStart,
+    AddReceiveAmount,
+    AddReciveTitle {
         amount: f64,
     },
 }
@@ -91,7 +91,7 @@ async fn main() {
 
 fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>> {
     let command_handler = teloxide::filter_command::<Command, _>().branch(
-        case![State::Start]
+        case![State::AddStart]
             .branch(case![Command::Help].endpoint(help))
             .branch(case![Command::Display].endpoint(display))
             .branch(case![Command::Reset].endpoint(reset))
@@ -100,8 +100,8 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
 
     let message_handler = Update::filter_message()
         .branch(command_handler)
-        .branch(case![State::ReceiveAmount].endpoint(receive_amount))
-        .branch(case![State::ReceiveTitle { amount }].endpoint(receive_title));
+        .branch(case![State::AddReceiveAmount].endpoint(receive_amount))
+        .branch(case![State::AddReciveTitle { amount }].endpoint(receive_title));
 
     let update_user_handler =
         Update::filter_message().map_async(|msg: Message, pool: SqlitePool| async move {
@@ -176,7 +176,7 @@ async fn reset(bot: Bot, msg: Message, pool: SqlitePool) -> HandlerResult {
 
 async fn start_add_dialogue(bot: Bot, dialogue: MyDialogue, msg: Message) -> HandlerResult {
     bot.send_message(msg.chat.id, "Enter amount:").await?;
-    dialogue.update(State::ReceiveAmount).await.unwrap();
+    dialogue.update(State::AddReceiveAmount).await.unwrap();
     Ok(())
 }
 
@@ -185,7 +185,7 @@ async fn receive_amount(bot: Bot, dialogue: MyDialogue, msg: Message) -> Handler
         Some(Ok(amount)) => {
             bot.send_message(msg.chat.id, "Enter title:").await?;
             dialogue
-                .update(State::ReceiveTitle { amount })
+                .update(State::AddReciveTitle { amount })
                 .await
                 .unwrap();
         }

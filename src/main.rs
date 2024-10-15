@@ -56,6 +56,10 @@ pub enum State {
     AddReceiveAmount {
         title: String,
     },
+    AddReceiveDescription {
+        title: String,
+        amount: f64,
+    },
 }
 
 // Clippy needless_return is bugged with tokio on nightly
@@ -101,7 +105,10 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
     let message_handler = Update::filter_message()
         .branch(command_handler)
         .branch(case![State::AddReceiveTitle].endpoint(receive_title))
-        .branch(case![State::AddReceiveAmount { title }].endpoint(receive_amount));
+        .branch(case![State::AddReceiveAmount { title }].endpoint(receive_amount))
+        .branch(
+            case![State::AddReceiveDescription { title, amount }].endpoint(receive_description),
+        );
 
     let update_user_handler =
         Update::filter_message().map_async(|msg: Message, pool: SqlitePool| async move {
@@ -185,39 +192,14 @@ async fn receive_amount(
     dialogue: MyDialogue,
     title: String,
     msg: Message,
-    pool: SqlitePool,
 ) -> HandlerResult {
     match msg.text().map(|text| text.parse::<f64>()) {
         Some(Ok(amount)) => {
-            let chat_id = msg.chat.id.0;
-            let user = msg.from.unwrap();
-            let user_id = user.id.0 as i64;
-            let name = user.username.unwrap_or(user_id.to_string());
-
-            let transaction = Transaction {
-                user_id,
-                title: title.clone(),
-                amount,
-                description: None,
-            };
-
-            DB::new(&pool).add_transaction(chat_id, transaction).await;
-
-            bot.send_message(
-                msg.chat.id,
-                format!(
-                    "*Added transaction*\n\n 🏷️ {}\n 💰 {}\n 🥷 [{}](tg://user?id={})",
-                    markdown::escape(&title),
-                    markdown::escape(&format_pounds(amount)),
-                    markdown::escape(&name),
-                    user_id
-                ),
-            )
-            .parse_mode(MarkdownV2)
-            .await
-            .unwrap();
-
-            dialogue.exit().await.unwrap();
+            bot.send_message(msg.chat.id, "Enter description:").await?;
+            dialogue
+                .update(State::AddReceiveDescription { title, amount })
+                .await
+                .unwrap();
         }
         _ => {
             bot.send_message(msg.chat.id, "Send me a number").await?;
@@ -244,4 +226,52 @@ async fn receive_title(bot: Bot, dialogue: MyDialogue, msg: Message) -> HandlerR
     }
 
     Ok(())
+}
+
+async fn receive_description(
+    bot: Bot,
+    dialogue: MyDialogue,
+    (title, amount): (String, f64),
+    msg: Message,
+    pool: SqlitePool,
+) -> HandlerResult {
+    match msg.text() {
+        Some(description) => {
+            let chat_id = msg.chat.id.0;
+            let user = msg.clone().from.unwrap();
+            let user_id = user.id.0 as i64;
+            let name = user.username.unwrap_or(user_id.to_string());
+
+            let transaction = Transaction {
+                user_id,
+                title: title.clone(),
+                amount,
+                description: Some(description.into()),
+            };
+
+            DB::new(&pool).add_transaction(chat_id, transaction).await;
+
+            let response = format!(
+                "*Added transaction*\n\n 🏷️ {}\n 💰 {}\n 🥷 [{}](tg://user?id={})\n📝 {}",
+                markdown::escape(&title),
+                markdown::escape(&format_pounds(amount)),
+                markdown::escape(&name),
+                user_id,
+                markdown::escape(description)
+            );
+
+            bot.send_message(msg.chat.id, response)
+                .parse_mode(MarkdownV2)
+                .await
+                .unwrap();
+
+            dialogue.exit().await.unwrap();
+
+            Ok(())
+        }
+        None => {
+            bot.send_message(msg.chat.id, "Send me plain text").await?;
+            Ok(())
+        }
+    }
 }

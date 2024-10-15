@@ -187,6 +187,25 @@ async fn start_add_dialogue(bot: Bot, dialogue: MyDialogue, msg: Message) -> Han
     Ok(())
 }
 
+async fn receive_title(bot: Bot, dialogue: MyDialogue, msg: Message) -> HandlerResult {
+    match msg.text() {
+        Some(title) => {
+            bot.send_message(msg.chat.id, "Enter amount:").await?;
+            dialogue
+                .update(State::AddReceiveAmount {
+                    title: title.to_string(),
+                })
+                .await
+                .unwrap();
+        }
+        None => {
+            bot.send_message(msg.chat.id, "Send me plain text").await?;
+        }
+    }
+
+    Ok(())
+}
+
 async fn receive_amount(
     bot: Bot,
     dialogue: MyDialogue,
@@ -203,25 +222,6 @@ async fn receive_amount(
         }
         _ => {
             bot.send_message(msg.chat.id, "Send me a number").await?;
-        }
-    }
-
-    Ok(())
-}
-
-async fn receive_title(bot: Bot, dialogue: MyDialogue, msg: Message) -> HandlerResult {
-    match msg.text() {
-        Some(title) => {
-            bot.send_message(msg.chat.id, "Enter amount:").await?;
-            dialogue
-                .update(State::AddReceiveAmount {
-                    title: title.to_string(),
-                })
-                .await
-                .unwrap();
-        }
-        None => {
-            bot.send_message(msg.chat.id, "Send me plain text").await?;
         }
     }
 

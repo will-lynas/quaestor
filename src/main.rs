@@ -103,7 +103,17 @@ fn schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>>
         .branch(case![State::ReceiveAmount].endpoint(receive_amount))
         .branch(case![State::ReceiveTitle { amount }].endpoint(receive_title));
 
-    dialogue::enter::<Update, InMemStorage<State>, State, _>().branch(message_handler)
+    let update_user_handler =
+        Update::filter_message().map_async(|msg: Message, pool: SqlitePool| async move {
+            let user = msg.from.unwrap();
+            let db = DB::new(&pool);
+            db.update_user(user.id.0 as i64, user.username.as_deref())
+                .await;
+        });
+
+    dialogue::enter::<Update, InMemStorage<State>, State, _>()
+        .branch(update_user_handler)
+        .branch(message_handler)
 }
 
 async fn help(bot: Bot, msg: Message) -> HandlerResult {
